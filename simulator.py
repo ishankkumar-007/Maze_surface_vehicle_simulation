@@ -85,10 +85,10 @@ class Player(pygame.sprite.Sprite):
             up = joystick.get_button(3)
             down = joystick.get_button(0)
             # rotation left
-            if rudder < -0.5:
+            if rudder < -0.5 and (up or down):
                 self.rot_speed = PLAYER_ROT_SPEED
             # rotation right
-            if rudder > 0.5:
+            if rudder > 0.5 and (up or down):
                 self.rot_speed = -PLAYER_ROT_SPEED
             # forward
             if up:
