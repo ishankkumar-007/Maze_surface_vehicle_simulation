@@ -57,11 +57,9 @@ class Player(pygame.sprite.Sprite):
 
     def get_keys(self): 
         # changes due to drag
-        if abs(self.rot_speed) <= DRAG_COEFF * self.rot_speed:
+        if abs(self.rot_speed) <= abs(DRAG_COEFF * self.rot_speed):
             self.rot_speed = 0
-        elif self.rot_speed > DRAG_COEFF * self.rot_speed:
-            self.rot_speed -= DRAG_COEFF * self.rot_speed
-        elif self.rot_speed < DRAG_COEFF * self.rot_speed:   # self.rot_speed will be -ve here
+        else:
             self.rot_speed -= DRAG_COEFF * self.rot_speed
         
         if pygame.math.Vector2.length(self.vel) <= DRAG_COEFF * pygame.math.Vector2.length(self.vel):
