@@ -79,32 +79,25 @@ class Player(pygame.sprite.Sprite):
             self.vel = vec(-PLAYER_SPEED, 0).rotate(-self.rot)
 
         # joystick control
-        if event.type == pygame.JOYAXISMOTION:
+        if event.type == pygame.JOYAXISMOTION or event.type == pygame.JOYBUTTONDOWN:
+            print(event)
+            # axis 0, b3 and n0
+            rudder = round(joystick.get_axis(0), 1)   # for left and right rotation
+            up = joystick.get_button(3)
+            down = joystick.get_button(0)
             # rotation left
-            left_thruster = round(joystick.get_axis(1), 1)
-            right_thruster = round(joystick.get_axis(3), 1)
-            if left_thruster > 0.5 and right_thruster < -0.5:
+            if rudder < -0.5:
                 self.rot_speed = PLAYER_ROT_SPEED
             # rotation right
-            if left_thruster < -0.5 and right_thruster > 0.5:
+            if rudder > 0.5:
                 self.rot_speed = -PLAYER_ROT_SPEED
             # forward
-            if left_thruster < -0.5 and right_thruster < -0.5:
+            if up:
                 self.vel = vec(PLAYER_SPEED, 0).rotate(-self.rot)
             # forward single motor
-            if left_thruster < -0.5 and not right_thruster < -0.5:
-                self.vel = vec(PLAYER_SPEED/2, 0).rotate(-self.rot)
-            if not left_thruster <  -0.5 and right_thruster < -0.5:
-                self.vel = vec(PLAYER_SPEED/2, 0).rotate(-self.rot)
-            # backward
-            if left_thruster > 0.5 and right_thruster > 0.5:
+            if down:
                 self.vel = vec(-PLAYER_SPEED, 0).rotate(-self.rot)
-            ### not adding as there is login collision with forward single motor
-            # # backward single motor
-            # if left_thruster > 0.5 and not right_thruster > 0.5:
-            #     self.vel = vec(-PLAYER_SPEED/2, 0).rotate(-self.rot)
-            # if not left_thruster > 0.5 and right_thruster > 0.5:
-            #     self.vel = vec(-PLAYER_SPEED/2, 0).rotate(-self.rot)
+
 
 
 
