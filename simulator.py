@@ -66,7 +66,7 @@ class Player(pygame.sprite.Sprite):
         
         if pygame.math.Vector2.length(self.vel) <= DRAG_COEFF * pygame.math.Vector2.length(self.vel):
             self.vel = vec(0, 0)
-        elif pygame.math.Vector2.length(self.vel) > DRAG_COEFF * pygame.math.Vector2.length(self.vel) and pygame.math.Vector2.length(self.vel) != 0:
+        elif pygame.math.Vector2.length(self.vel) > DRAG_COEFF * pygame.math.Vector2.length(self.vel) and round(pygame.math.Vector2.length(self.vel)) != 0:
             self.vel.scale_to_length(pygame.math.Vector2.length(self.vel) - DRAG_COEFF * pygame.math.Vector2.length(self.vel))
 
         # motor input
