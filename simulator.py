@@ -7,10 +7,11 @@ HEIGHT = 900
 FPS = 30
 
 # in px/s
-PLAYER_SPEED = 260
-PLAYER_ROT_SPEED = 150
-DRAG = 10
-ROT_DRAG = 7
+PLAYER_SPEED = 300
+PLAYER_ROT_SPEED = 200
+# DRAG = 10
+# ROT_DRAG = 7
+DRAG_COEFF = 0.11
 
 # define colors
 WHITE = (255, 255, 255)
@@ -56,17 +57,17 @@ class Player(pygame.sprite.Sprite):
 
     def get_keys(self): 
         # changes due to drag
-        if abs(self.rot_speed) <= ROT_DRAG:
+        if abs(self.rot_speed) <= DRAG_COEFF * self.rot_speed:
             self.rot_speed = 0
-        elif self.rot_speed > ROT_DRAG:
-            self.rot_speed -= ROT_DRAG
-        elif self.rot_speed < ROT_DRAG:
-            self.rot_speed -= -ROT_DRAG
+        elif self.rot_speed > DRAG_COEFF * self.rot_speed:
+            self.rot_speed -= DRAG_COEFF * self.rot_speed
+        elif self.rot_speed < DRAG_COEFF * self.rot_speed:   # self.rot_speed will be -ve here
+            self.rot_speed -= DRAG_COEFF * self.rot_speed
         
-        if pygame.math.Vector2.length(self.vel) <= DRAG:
+        if pygame.math.Vector2.length(self.vel) <= DRAG_COEFF * pygame.math.Vector2.length(self.vel):
             self.vel = vec(0, 0)
-        elif pygame.math.Vector2.length(self.vel) > DRAG:
-            self.vel.scale_to_length(pygame.math.Vector2.length(self.vel) - DRAG)
+        elif pygame.math.Vector2.length(self.vel) > DRAG_COEFF * pygame.math.Vector2.length(self.vel) and pygame.math.Vector2.length(self.vel) != 0:
+            self.vel.scale_to_length(pygame.math.Vector2.length(self.vel) - DRAG_COEFF * pygame.math.Vector2.length(self.vel))
 
         # motor input
         key = pygame.key.get_pressed()
