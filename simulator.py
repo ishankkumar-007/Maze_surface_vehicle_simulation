@@ -80,30 +80,33 @@ class Player(pygame.sprite.Sprite):
             self.vel = vec(-PLAYER_SPEED, 0).rotate(-self.rot)
 
         # joystick control
-        if event.type == pygame.JOYBUTTONDOWN:
-            print(event)
+        if event.type == pygame.JOYAXISMOTION:
             # rotation left
-            if joystick.get_button(6) and joystick.get_button(5):
+            left_thruster = round(joystick.get_axis(1), 1)
+            right_thruster = round(joystick.get_axis(3), 1)
+            if left_thruster > 0.5 and right_thruster < -0.5:
                 self.rot_speed = PLAYER_ROT_SPEED
             # rotation right
-            if joystick.get_button(4) and joystick.get_button(7):
+            if left_thruster < -0.5 and right_thruster > 0.5:
                 self.rot_speed = -PLAYER_ROT_SPEED
-            # backward
-            if joystick.get_button(6) and joystick.get_button(7):
-                self.vel = vec(-PLAYER_SPEED, 0).rotate(-self.rot)
-            # # backward single motor
-            # if joystick.get_button(6) and not joystick.get_button(7):
-            #     self.vel = vec(-PLAYER_SPEED/2, 0).rotate(-self.rot)
-            # if not joystick.get_button(6) and joystick.get_button(7):
-            #     self.vel = vec(-PLAYER_SPEED/2, 0).rotate(-self.rot)
             # forward
-            if joystick.get_button(4) and joystick.get_button(5):
+            if left_thruster < -0.5 and right_thruster < -0.5:
                 self.vel = vec(PLAYER_SPEED, 0).rotate(-self.rot)
-            # # forward single motor
-            # if joystick.get_button(4) and not joystick.get_button(5):
-            #     self.vel = vec(PLAYER_SPEED/2, 0).rotate(-self.rot)
-            # if not joystick.get_button(4) and joystick.get_button(5):
-            #     self.vel = vec(PLAYER_SPEED/2, 0).rotate(-self.rot)
+            # forward single motor
+            if left_thruster < -0.5 and not right_thruster < -0.5:
+                self.vel = vec(PLAYER_SPEED/2, 0).rotate(-self.rot)
+            if not left_thruster <  -0.5 and right_thruster < -0.5:
+                self.vel = vec(PLAYER_SPEED/2, 0).rotate(-self.rot)
+            # backward
+            if left_thruster > 0.5 and right_thruster > 0.5:
+                self.vel = vec(-PLAYER_SPEED, 0).rotate(-self.rot)
+            ### not adding as there is login collision with forward single motor
+            # # backward single motor
+            # if left_thruster > 0.5 and not right_thruster > 0.5:
+            #     self.vel = vec(-PLAYER_SPEED/2, 0).rotate(-self.rot)
+            # if not left_thruster > 0.5 and right_thruster > 0.5:
+            #     self.vel = vec(-PLAYER_SPEED/2, 0).rotate(-self.rot)
+
 
 
     def update(self, dt):
