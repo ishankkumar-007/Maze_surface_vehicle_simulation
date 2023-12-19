@@ -7,6 +7,11 @@ vec = pygame.math.Vector2
 WIDTH = 1200
 HEIGHT = 900
 FPS = 30
+# in px/s
+PLAYER_SPEED = 260
+PLAYER_ROT_SPEED = 100
+DRAG = 20
+ROT_DRAG = 7
 
 # define colors
 WHITE = (255, 255, 255)
@@ -37,36 +42,8 @@ class Player(pygame.sprite.Sprite):
         self.rect.center = (40, 50)
         self.thrust = 260  # in px/s
         self.vel = vec(0, 0)
-        # self.rect.center = (WIDTH/2, HEIGHT/2)
         self.rot = -90
-        self.clockwise_rot_speed = 5
-        self.anticlockwise_rot_speed = -5
-    
-    def rot_clockwise(self):
-        self.rot += self.clockwise_rot_speed
-        self.vel.rotate(self.clockwise_rot_speed)
-        self.image = pygame.transform.rotate(self.image_org, self.rot+90)
-        old_center = self.rect.center
-        self.rect = self.image.get_rect()
-        self.rect.center = old_center
-    
-    def rot_anticlockwise(self):
-        self.rot += self.anticlockwise_rot_speed
-        self.vel.rotate(self.anticlockwise_rot_speed)
-        self.image = pygame.transform.rotate(self.image_org, self.rot+90)
-        old_center = self.rect.center
-        self.rect = self.image.get_rect()
-        self.rect.center = old_center
-    
-    def move_forward(self):
-        self.vel = vec(self.thrust * dt, 0).rotate(-self.rot)
-        self.pos += self.vel
-        self.rect.center = self.pos
-
-    def move_backward(self):
-        self.vel = vec(-self.thrust * dt, 0).rotate(-self.rot)
-        self.pos += self.vel
-        self.rect.center = self.pos
+        self.rot_speed = 0
 
     def boundary_constraints(self):
         if self.pos.x > WIDTH:
@@ -78,31 +55,42 @@ class Player(pygame.sprite.Sprite):
         if self.pos.y < 0:
             self.pos.y = 0
 
-    def get_keys(self):
+    def get_keys(self): 
+        # changes due to drag
+        if abs(self.rot_speed) <= ROT_DRAG:
+            self.rot_speed = 0
+        elif self.rot_speed > ROT_DRAG:
+            self.rot_speed -= ROT_DRAG
+        elif self.rot_speed < ROT_DRAG:
+            self.rot_speed -= -ROT_DRAG
+        
+        if pygame.math.Vector2.length(self.vel) <= DRAG:
+            self.vel = vec(0, 0)
+        elif pygame.math.Vector2.length(self.vel) > DRAG:
+            self.vel.scale_to_length(pygame.math.Vector2.length(self.vel) - DRAG)
+
+        # motor input
         key = pygame.key.get_pressed()
         if key[pygame.K_LEFT]:
-            self.rot_clockwise()
+            self.rot_speed = PLAYER_ROT_SPEED
         if key[pygame.K_RIGHT]:
-            self.rot_anticlockwise()
+            self.rot_speed = -PLAYER_ROT_SPEED
         if key[pygame.K_UP]:
-            self.move_forward()
+            self.vel = vec(PLAYER_SPEED, 0).rotate(-self.rot)
         if key[pygame.K_DOWN]:
-            self.move_backward()
-
-        if key[pygame.K_z] and key[pygame.K_s]:
-            self.rot_clockwise()
-        if key[pygame.K_x] and key[pygame.K_a]:
-            self.rot_anticlockwise()
-        if key[pygame.K_a] and key[pygame.K_s]:
-            self.move_forward()
-        if key[pygame.K_z] and key[pygame.K_x]:
-            self.move_backward()
-
+            self.vel = vec(-PLAYER_SPEED, 0).rotate(-self.rot)
 
     def update(self, dt):
         self.get_keys()
-        
+        self.rot = (self.rot + self.rot_speed * dt) % 360
+        self.image = pygame.transform.rotate(self.image_org, self.rot+90)
+        self.rect = self.image.get_rect()
+        self.rect.center = self.pos
+
+        # self.pos = self.pos + self.vel
+        self.pos += (self.vel[0] * dt, self.vel[1] * dt)
         self.boundary_constraints()
+        self.rect.center = self.pos
 
 
 # initialize pygame and create window
