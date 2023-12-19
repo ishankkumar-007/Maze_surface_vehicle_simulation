@@ -1,16 +1,15 @@
-# Pygame sprite Example
 import pygame
 import random
 vec = pygame.math.Vector2
-# from os import path
 
 WIDTH = 1200
 HEIGHT = 900
 FPS = 30
+
 # in px/s
 PLAYER_SPEED = 260
-PLAYER_ROT_SPEED = 100
-DRAG = 20
+PLAYER_ROT_SPEED = 150
+DRAG = 10
 ROT_DRAG = 7
 
 # define colors
@@ -80,6 +79,33 @@ class Player(pygame.sprite.Sprite):
         if key[pygame.K_DOWN]:
             self.vel = vec(-PLAYER_SPEED, 0).rotate(-self.rot)
 
+        # joystick control
+        if event.type == pygame.JOYBUTTONDOWN:
+            print(event)
+            # rotation left
+            if joystick.get_button(6) and joystick.get_button(5):
+                self.rot_speed = PLAYER_ROT_SPEED
+            # rotation right
+            if joystick.get_button(4) and joystick.get_button(7):
+                self.rot_speed = -PLAYER_ROT_SPEED
+            # backward
+            if joystick.get_button(6) and joystick.get_button(7):
+                self.vel = vec(-PLAYER_SPEED, 0).rotate(-self.rot)
+            # # backward single motor
+            # if joystick.get_button(6) and not joystick.get_button(7):
+            #     self.vel = vec(-PLAYER_SPEED/2, 0).rotate(-self.rot)
+            # if not joystick.get_button(6) and joystick.get_button(7):
+            #     self.vel = vec(-PLAYER_SPEED/2, 0).rotate(-self.rot)
+            # forward
+            if joystick.get_button(4) and joystick.get_button(5):
+                self.vel = vec(PLAYER_SPEED, 0).rotate(-self.rot)
+            # # forward single motor
+            # if joystick.get_button(4) and not joystick.get_button(5):
+            #     self.vel = vec(PLAYER_SPEED/2, 0).rotate(-self.rot)
+            # if not joystick.get_button(4) and joystick.get_button(5):
+            #     self.vel = vec(PLAYER_SPEED/2, 0).rotate(-self.rot)
+
+
     def update(self, dt):
         self.get_keys()
         self.rot = (self.rot + self.rot_speed * dt) % 360
@@ -95,6 +121,9 @@ class Player(pygame.sprite.Sprite):
 
 # initialize pygame and create window
 pygame.init()
+pygame.joystick.init()
+joysticks = [pygame.joystick.Joystick(x) for x in range(pygame.joystick.get_count())]
+joystick = pygame.joystick.Joystick(0)
 pygame.mixer.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 Icon = pygame.image.load('./images/auv.png')
@@ -127,4 +156,5 @@ while running:
     # *after* drawing everything, flip the display
     pygame.display.flip()
 
+pygame.joystick.quit()
 pygame.quit()
