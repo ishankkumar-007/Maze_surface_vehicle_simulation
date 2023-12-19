@@ -80,8 +80,7 @@ class Player(pygame.sprite.Sprite):
 
         # joystick control
         if event.type == pygame.JOYAXISMOTION or event.type == pygame.JOYBUTTONDOWN:
-            print(event)
-            # axis 0, b3 and n0
+            # axis 0, b3 and b0
             rudder = round(joystick.get_axis(0), 1)   # for left and right rotation
             up = joystick.get_button(3)
             down = joystick.get_button(0)
@@ -97,9 +96,6 @@ class Player(pygame.sprite.Sprite):
             # forward single motor
             if down:
                 self.vel = vec(-PLAYER_SPEED, 0).rotate(-self.rot)
-
-
-
 
     def update(self, dt):
         self.get_keys()
