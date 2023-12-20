@@ -1,25 +1,38 @@
 import pygame
 import random
+from os import path
 vec = pygame.math.Vector2
 
-WIDTH = 1200
-HEIGHT = 900
+WIDTH = 1216   # 38 x 32
+HEIGHT = 896   # 28 x 32
 FPS = 30
+TILESIZE = 32
+GRIDWIDTH = WIDTH/TILESIZE
+GRIDHEIGHT = HEIGHT/TILESIZE
 
 # in px/s
 PLAYER_SPEED = 300
-PLAYER_ROT_SPEED = 200
+PLAYER_ROT_SPEED = 150
 # DRAG = 10
 # ROT_DRAG = 7
 DRAG_COEFF = 0.11
 
 # define colors
 WHITE = (255, 255, 255)
+LIGHTGREY = (40, 40, 40)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
+
+# load game_map
+game_folder = path.dirname(__file__)
+map_data = []
+with open(path.join(game_folder, 'map.txt'), 'rt') as f:
+    for line in f:
+        map_data.append(line)
+
 
 # boat
 boat_2 = pygame.image.load("./images/boat_2.png")
@@ -37,7 +50,7 @@ class Player(pygame.sprite.Sprite):
         self.image_org = boat_2
         self.image = boat_2
         self.rect = self.image.get_rect()
-        self.pos = vec(40, 50)
+        self.pos = vec(4*TILESIZE, 4*TILESIZE)
         self.rect.center = self.pos
         self.rect.center = (40, 50)
         self.thrust = 260  # in px/s
@@ -97,6 +110,24 @@ class Player(pygame.sprite.Sprite):
             if down:
                 self.vel = vec(-PLAYER_SPEED, 0).rotate(-self.rot)
 
+    def collide_with_walls(self):
+        self.rect.centerx = self.pos.x
+        for wall in pygame.sprite.spritecollide(self, walls, False):
+            if self.vel.x > 0:
+                self.rect.right = wall.rect.left
+            elif self.vel.x < 0:
+                self.rect.left = wall.rect.right
+            self.pos.x = self.rect.centerx
+
+        self.rect.centery = self.pos.y
+        for wall in pygame.sprite.spritecollide(self, walls, False):
+            if self.vel.y > 0:
+                self.rect.bottom = wall.rect.top
+            elif self.vel.y < 0:
+                self.rect.top = wall.rect.bottom
+            self.pos.y = self.rect.centery
+
+
     def update(self, dt):
         self.get_keys()
         self.rot = (self.rot + self.rot_speed * dt) % 360
@@ -107,7 +138,23 @@ class Player(pygame.sprite.Sprite):
         # self.pos = self.pos + self.vel
         self.pos += (self.vel[0] * dt, self.vel[1] * dt)
         self.boundary_constraints()
+        self.collide_with_walls()
         self.rect.center = self.pos
+        # self.rect.x = self.pos[0]
+        # self.rect.y = self.pos[1]
+        # self.collide_with_walls('y')
+
+
+class Wall(pygame.sprite.Sprite):
+    # sprite for the Wall
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface((TILESIZE, TILESIZE))
+        self.image.fill(BLACK)
+        self.rect = self.image.get_rect()
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
+
 
 
 # initialize pygame and create window
@@ -123,8 +170,22 @@ pygame.display.set_icon(Icon)
 clock = pygame.time.Clock()
 
 all_sprites = pygame.sprite.Group()
+walls = pygame.sprite.Group()
 player = Player()
 all_sprites.add(player)
+
+# making the walls
+for row, tiles in enumerate(map_data):
+    for col, tile in enumerate(tiles):
+        if tile == '1':
+            wall = Wall(col, row)
+            walls.add(wall)
+
+def draw_grid():
+    for x in range(0, WIDTH, TILESIZE):
+        pygame.draw.line(screen, LIGHTGREY, (x, 0), (x, HEIGHT))
+    for y in range(0, HEIGHT, TILESIZE):
+        pygame.draw.line(screen, LIGHTGREY, (0, y), (WIDTH, y))
 
 # Main loop
 running = True
@@ -144,6 +205,8 @@ while running:
     # Draw / render
     screen.blit(background, (0, 0))
     all_sprites.draw(screen)
+    walls.draw(screen)
+    draw_grid()
     # *after* drawing everything, flip the display
     pygame.display.flip()
 
